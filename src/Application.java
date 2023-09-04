@@ -152,6 +152,10 @@ public class Application extends JFrame implements ActionListener {
         currentItem = null;
         currentDetails = 1;
         updateElements();
+        buttonFind.setEnabled(true);
+        buttonCheckout.setEnabled(true);
+        buttonView.setEnabled(true);
+        buttonAdd.setEnabled(true);
     }
 
     private void buttonCheckoutPressed() {
@@ -178,7 +182,10 @@ public class Application extends JFrame implements ActionListener {
         JOptionPane.showMessageDialog(null, message, "FINAL INVOICE", JOptionPane.INFORMATION_MESSAGE);
 
         // Grey out options until user makes new order
-        //buttonFind.setEnabled(false);
+        buttonFind.setEnabled(false);
+        buttonCheckout.setEnabled(false);
+        buttonView.setEnabled(false);
+        buttonAdd.setEnabled(false);
     }
 
     private void buttonFindPressed() {

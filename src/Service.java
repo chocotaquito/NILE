@@ -1,5 +1,7 @@
 import java.io.*;
 import java.lang.reflect.Array;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -73,7 +75,7 @@ public class Service {
         Item item = new Item();
         BufferedWriter writer;
         try {
-            writer = new BufferedWriter(new FileWriter("./src/database/inventoryTEST.csv"));
+            writer = new BufferedWriter(new FileWriter("./src/database/temp.csv"));
             try{
                 Scanner scanner = new Scanner(file);
                 scanner.useDelimiter(", |\\n");
@@ -121,6 +123,7 @@ public class Service {
                 }
                 writer.close();
                 scanner.close();
+                copyFiles(new File("./src/database/temp.csv"), file);
             }
             catch (FileNotFoundException e){
                 return new Response(500, Consts.errorFile);
@@ -130,6 +133,9 @@ public class Service {
             return new Response(500, Consts.errorIO);
         }
         return new Response(500, "Item ID " + " not in file");
+    }
+    private static void copyFiles(File source, File dest) throws IOException {
+        Files.move(source.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
     Response updateTransactions(ArrayList<Item> cart){
         try{
@@ -146,8 +152,8 @@ public class Service {
                                 " $" + String.format("%.2f", cart.get(i).getPrice()) +
                                 " " + cart.get(i).getQuantity() +
                                 " " + cart.get(i).getDiscount() +
-                                "% $" + String.format("%.2f", cart.get(i).getTotal())
-                        ));
+                                "% $" + String.format("%.2f", cart.get(i).getTotal())+ " "
+                ));
                 dtf =  DateTimeFormatter.ofPattern("MMMM d, yyyy, hh:mm:ssa z");
                 bw.write(dtf.format(now));
                 bw.newLine();
