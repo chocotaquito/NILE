@@ -1,3 +1,8 @@
+/* Name: Samuel Tofexis
+Course: CNT 4714 – Fall 2023
+Assignment title: Project 1 – Event-driven Enterprise Simulation
+Date: Sunday September 11, 2023
+*/
 public class Item {
     // Item entry for user's cart
     private String ID;
@@ -92,7 +97,7 @@ public class Item {
     public float getTotal() {
        // return quantity*price;
         float val = quantity*price;
-        val -= val/100;
+        val -= getDiscount()/100;
         return (float)((int)Math.round((val*100)))/100;
     }
 }

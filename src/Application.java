@@ -1,3 +1,8 @@
+/* Name: Samuel Tofexis
+Course: CNT 4714 – Fall 2023
+Assignment title: Project 1 – Event-driven Enterprise Simulation
+Date: Sunday September 11, 2023
+*/
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
@@ -16,8 +21,12 @@ import java.util.HashMap;
 public class Application extends JFrame implements ActionListener {
 
     Item currentItem;
+    int cartQuantity = 0;
+    float total = 0;
+    Boolean checkedOut = false; // Variable only used so onFieldUpdate doesn't let the
+                        // user add another item after they checked out
     ArrayList<Item> cart = new ArrayList<>();
-    HashMap<String, Item> cartHash = new HashMap<>();    // Used so we can update the database
+    HashMap<String, Item> cartHash = new HashMap<>();       // Used so we can update the database
                                                             // linearly without sorting the cart
     int currentDetails = 1; // The counter to update what item number is displayed for item details
 
@@ -143,15 +152,21 @@ public class Application extends JFrame implements ActionListener {
     }
 
     private void onFieldUpdate() {
-        buttonFind.setEnabled(true);
+        if (!checkedOut){
+            buttonFind.setEnabled(true);
+        }
     }
 
     private void buttonEmptyPressed() {
+        checkedOut = false;
         cart = new ArrayList<>();
         cartHash = new HashMap<>();
         currentItem = null;
         currentDetails = 1;
         updateElements();
+        fieldDetails.setText("");
+        fieldID.setText("");
+        fieldSubtotal.setText("");
         buttonFind.setEnabled(true);
         buttonCheckout.setEnabled(true);
         buttonView.setEnabled(true);
@@ -164,24 +179,22 @@ public class Application extends JFrame implements ActionListener {
         ZonedDateTime now = ZonedDateTime.now();
         String message = "";
         float subtotal = 0;
-        float total = 0;
         message += "Date: " + dtf.format(now)+"\n\n";
         message += "Number of line items: "+ cart.size()+"\n\n";
         message += "Item# / ID / Title / Price / Qty / Disc % / Subtotal:"+"\n\n";
         for (int i = 0; i < cart.size(); i++){
             message += (""+(i+1)+". "+cart.get(i).toString()+"\n");
-            subtotal += cart.get(i).getTotal();
         }
-        total = subtotal + (subtotal*0.06f);
         message += "Order subtotal:\t$"+
                 String.format("%.2f", subtotal)+"\n\n";
         message += "Tax rate:\t6%"+"\n\n";
-        message += "Tax amount:\t"+String.format("%.2f",(subtotal*0.06f))+"\n\n";
-        message += "ORDER TOTAL:\t$"+String.format("%.2f", total)+"\n\n";
+        message += "Tax amount:\t"+String.format("%.2f",(total*0.06f))+"\n\n";
+        message += "ORDER TOTAL:\t$"+String.format("%.2f", total+(total*0.06f))+"\n\n";
         message += "Thanks for shopping at Nile Dot Com!";
         JOptionPane.showMessageDialog(null, message, "FINAL INVOICE", JOptionPane.INFORMATION_MESSAGE);
 
         // Grey out options until user makes new order
+        checkedOut = true;
         buttonFind.setEnabled(false);
         buttonCheckout.setEnabled(false);
         buttonView.setEnabled(false);
@@ -216,14 +229,12 @@ public class Application extends JFrame implements ActionListener {
         System.out.println("Stock: "+currentItem.getStock());
         // Update the text entry fields
         fieldDetails.setText(response.getItem().toString());
-        fieldSubtotal.setText("$"+String.format("%.2f", response.getItem().getTotal()));
         int currentQuantity = 0;
         if (currentItem != null){
             currentQuantity = currentItem.getQuantity();
         }
         currentDetails = (cart.size()+1);
         labelDetails.setText("Details for Item #"+currentDetails+": ");
-        labelSubtotal.setText("Order subtotal for "+currentQuantity+" item(s): ");
 
         buttonAdd.setEnabled(true);
         buttonFind.setEnabled(false);
@@ -252,6 +263,11 @@ public class Application extends JFrame implements ActionListener {
             }
             cartHash.put(currentItem.getID(),currentItem);
             updateElements();
+            cartQuantity += currentItem.getQuantity();
+            total += currentItem.getTotal();
+            labelSubtotal.setText("Order subtotal for "+cartQuantity+" item(s): ");
+            fieldSubtotal.setText("$"+String.format("%.2f", total));
+            fieldID.setText("");
 
             // Do not update database when added, only when checkout occurs
             // Double check quantity database at moment of transaction
@@ -261,6 +277,7 @@ public class Application extends JFrame implements ActionListener {
             // Add duplicate quantity to current (HASHMAP ITEM ID)
             // replace entry
             currentItem = null;
+            buttonAdd.setEnabled(false);
             buttonFind.setEnabled(true);
             buttonView.setEnabled(true);
             buttonCheckout.setEnabled(true);
@@ -272,11 +289,8 @@ public class Application extends JFrame implements ActionListener {
     }
 
     private void updateElements(){
-        fieldDetails.setText("");
         fieldSubtotal.setText("");
         fieldQuantity.setText("");
-        fieldID.setText("");
-        fieldSubtotal.setText("");
 
         buttonFind.setText("Find Item #" + (cart.size()+1));
         buttonAdd.setText("Add Item #"+(cart.size()+1)+" To Cart");

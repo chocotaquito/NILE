@@ -1,3 +1,8 @@
+/* Name: Samuel Tofexis
+Course: CNT 4714 – Fall 2023
+Assignment title: Project 1 – Event-driven Enterprise Simulation
+Date: Sunday September 11, 2023
+*/
 import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.file.Files;
@@ -16,7 +21,7 @@ public class Service {
         Item item = new Item();
         try{
             Scanner scanner = new Scanner(file);
-            scanner.useDelimiter(", |\\n");
+            scanner.useDelimiter(", |\n");
             String currentString;
             Boolean idFound = false;
             while (scanner.hasNext()) {
@@ -51,7 +56,10 @@ public class Service {
                             break;
                         case 4:
                             item.setPrice(Float.parseFloat(currentString));
-                            break;
+                            if (scanner.hasNext()){ // In the event that the item is at the end of the file
+                                                    // this will make sure that the default case executes
+                                break;
+                            }
                         default:
                             scanner.close();
                             return new Response(200, "", item);
@@ -147,17 +155,18 @@ public class Service {
                 dtf =  DateTimeFormatter.ofPattern("DDMMYYYYHHMMSS");
                 bw.write(dtf.format(now)+(      // toString isn't used here because
                                                     // the quotations around the name don't display correctly
-                        "" + cart.get(i).getID() + " " +
+                        ", " + cart.get(i).getID() + ", " +
                                 cart.get(i).getName() +
-                                " $" + String.format("%.2f", cart.get(i).getPrice()) +
-                                " " + cart.get(i).getQuantity() +
-                                " " + cart.get(i).getDiscount() +
-                                "% $" + String.format("%.2f", cart.get(i).getTotal())+ " "
+                                ", $" + String.format("%.2f", cart.get(i).getPrice()) +
+                                ", " + cart.get(i).getQuantity() +
+                                ", " + cart.get(i).getDiscount() +
+                                "%, $" + String.format("%.2f", cart.get(i).getTotal())+ " "
                 ));
                 dtf =  DateTimeFormatter.ofPattern("MMMM d, yyyy, hh:mm:ssa z");
                 bw.write(dtf.format(now));
                 bw.newLine();
             }
+            bw.newLine();
             bw.close();
         }
         catch(IOException e){
